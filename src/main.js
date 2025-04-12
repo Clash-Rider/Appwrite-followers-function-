@@ -14,12 +14,19 @@ export default async ({ req, res, log, error }) => {
   const STATS_COLLECTION_ID = process.env.STATS_COLLECTION_ID;
 
   try {
+    const contentType = req.headers['content-type'] || req.headers['Content-Type'];
     let body;
 
-    try {
-      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    } catch (err) {
-      return res.json({ success: false, error: 'Invalid JSON in request body' });
+    if (contentType === 'application/json') {
+      body = req.body; // Appwrite parses JSON and gives it directly
+    } else if (typeof req.body === 'string') {
+      try {
+        body = JSON.parse(req.body);
+      } catch (err) {
+        return res.json({ success: false, error: 'Invalid JSON in request body' });
+      }
+    } else {
+      return res.json({ success: false, error: 'Unsupported content type' });
     }
 
     const { followerId, followeeId } = body;
