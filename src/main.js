@@ -25,15 +25,15 @@ export default async ({ req, res, log, error }) => {
     const { followerId, followeeId } = body;
 
     if (!followerId || !followeeId) {
-      return res.json({ success: false, error: "Missing user IDs" });
+      return res.json({ success: false, error: 'Missing user IDs' });
     }
 
     const followersList = await databases.listDocuments(DATABASE_ID, FOLLOWS_COLLECTION_ID, [
-      Query.equal("followeeId", followeeId),
+      Query.equal('followeeId', followeeId),
     ]);
 
     const followingList = await databases.listDocuments(DATABASE_ID, FOLLOWS_COLLECTION_ID, [
-      Query.equal("followerId", followerId),
+      Query.equal('followerId', followerId),
     ]);
 
     const followersCount = followersList.total;
@@ -55,7 +55,7 @@ export default async ({ req, res, log, error }) => {
       },
     });
   } catch (err) {
-    log("Error: " + err.message);
+    log('Error: ' + err.message);
     return res.json({ success: false, error: err.message });
   }
 };
