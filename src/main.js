@@ -19,7 +19,7 @@ export default async function main({ req, res, context }) {
     let body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
     const { followeeId } = body;  // Only extract followeeId from the body
 
-    // Extract the user ID from the headers
+    // Extract the user ID from the headers much saffer
     const followerId = req.headers['x-appwrite-user-id'];
 
     if (!followerId || !followeeId) {
