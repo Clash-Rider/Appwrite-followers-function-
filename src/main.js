@@ -1,14 +1,12 @@
 import { Client, Users, Databases, Query } from 'node-appwrite';
 
 export default async function main({ req, res }) {
-  console.log('--- Function start ---');
+  console.log(req);
 
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
     .setKey(req.headers['x-appwrite-key'] ?? '');
-
-  console.log('Client initialized');
 
   const users = new Users(client);
   const databases = new Databases(client);
