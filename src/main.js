@@ -14,7 +14,15 @@ export default async ({ req, res, log, error }) => {
   const STATS_COLLECTION_ID = process.env.STATS_COLLECTION_ID;
 
   try {
-    const { followerId, followeeId } = JSON.parse(req.body);
+    let body;
+
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (err) {
+      return res.json({ success: false, error: 'Invalid JSON in request body' });
+    }
+
+    const { followerId, followeeId } = body;
 
     if (!followerId || !followeeId) {
       return res.json({ success: false, error: "Missing user IDs" });
