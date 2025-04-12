@@ -1,7 +1,7 @@
 import { Client, Users, Databases, Query } from 'node-appwrite';
 
 export default async function main({ req, res }) {
-  console.log(req);
+  context.log(req);
 
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
