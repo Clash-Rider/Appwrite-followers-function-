@@ -1,7 +1,7 @@
 import { Client, Users, Databases, Query } from 'node-appwrite';
 
-export default async function main({ req, res }) {
-  console.log(req);
+export default async function main({ req, res, context }) {
+  context.log(req);
 
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
@@ -18,7 +18,11 @@ export default async function main({ req, res }) {
   try {
     const rawBody = req.body;
     let body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
-    const { followerId, followeeId } = body;
+    const { followeeId } = body;  // Only extract followeeId from the body
+
+    // Extract the user ID from the headers
+    const followerId = req.headers['x-appwrite-user-id'];
+    context.log(`User ID: ${followerId}`);
 
     if (!followerId || !followeeId) {
       return res.json({ success: false, error: 'Missing user IDs' });
@@ -30,12 +34,12 @@ export default async function main({ req, res }) {
     ]);
 
     if (existingFollow.total > 0) {
-      console.log('Follow exists, deleting...');
+      context.log('Follow exists, deleting...');
       for (const doc of existingFollow.documents) {
         await databases.deleteDocument(DATABASE_ID, FOLLOWS_COLLECTION_ID, doc.$id);
       }
     } else {
-      console.log('No follow found, creating new follow...');
+      context.log('No follow found, creating new follow...');
       await databases.createDocument(DATABASE_ID, FOLLOWS_COLLECTION_ID, 'unique()', {
         followerId,
         followeeId,
@@ -52,14 +56,14 @@ export default async function main({ req, res }) {
     const followersCount = followersList.total;
     const followingCount = followingList.total;
 
-    const updateOrCreate = async (userId, field, value) => {
+    const updateOrCreate = async (id, field, value) => {
       try {
-        await databases.updateDocument(DATABASE_ID, STATS_COLLECTION_ID, userId, {
+        await databases.updateDocument(DATABASE_ID, STATS_COLLECTION_ID, id, {
           [field]: value,
         });
       } catch (e) {
         if (e.message.includes('Document with the requested ID could not be found')) {
-          await databases.createDocument(DATABASE_ID, STATS_COLLECTION_ID, userId, {
+          await databases.createDocument(DATABASE_ID, STATS_COLLECTION_ID, id, {
             followersCount: 0,
             followingCount: 0,
             [field]: value,
@@ -81,6 +85,7 @@ export default async function main({ req, res }) {
       },
     });
   } catch (err) {
+    context.error(err);
     return res.json({ success: false, error: err.message });
   }
 }
