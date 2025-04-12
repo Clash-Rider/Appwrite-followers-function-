@@ -1,6 +1,10 @@
 import { Client, Users, Databases, Query } from 'node-appwrite';
 
+<<<<<<< HEAD
 export default async function main({ req, res, context }) {
+=======
+export default async function main({ req, res }) {
+>>>>>>> dac06bc7585c836138ff00f542aec877d2804bef
   context.log(req);
 
   const client = new Client()
