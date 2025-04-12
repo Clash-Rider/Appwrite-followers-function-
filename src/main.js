@@ -1,7 +1,6 @@
 import { Client, Users, Databases, Query } from 'node-appwrite';
 
 export default async function main({ req, res, context }) {
-  context.log(req);
 
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
@@ -22,7 +21,6 @@ export default async function main({ req, res, context }) {
 
     // Extract the user ID from the headers
     const followerId = req.headers['x-appwrite-user-id'];
-    context.log(`User ID: ${followerId}`);
 
     if (!followerId || !followeeId) {
       return res.json({ success: false, error: 'Missing user IDs' });
@@ -34,12 +32,10 @@ export default async function main({ req, res, context }) {
     ]);
 
     if (existingFollow.total > 0) {
-      context.log('Follow exists, deleting...');
       for (const doc of existingFollow.documents) {
         await databases.deleteDocument(DATABASE_ID, FOLLOWS_COLLECTION_ID, doc.$id);
       }
     } else {
-      context.log('No follow found, creating new follow...');
       await databases.createDocument(DATABASE_ID, FOLLOWS_COLLECTION_ID, 'unique()', {
         followerId,
         followeeId,
