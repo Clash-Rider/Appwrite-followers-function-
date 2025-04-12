@@ -44,7 +44,7 @@ export default async function main({ req, res }) {
     const { followerId, followeeId } = body;
 
     if (!followerId || !followeeId) {
-      console.log('Missing required fields: followerId or followeeId');
+      console.log('Missing user IDs');
       return res.json({ success: false, error: 'Missing user IDs' });
     }
 
@@ -63,15 +63,29 @@ export default async function main({ req, res }) {
 
     console.log('Counts:', { followersCount, followingCount });
 
-    await databases.updateDocument(DATABASE_ID, STATS_COLLECTION_ID, followeeId, {
-      followersCount,
-    });
-    console.log(`Updated followersCount for ${followeeId}`);
+    const updateOrCreate = async (userId, field, value) => {
+      try {
+        await databases.updateDocument(DATABASE_ID, STATS_COLLECTION_ID, userId, {
+          [field]: value,
+        });
+        console.log(`Updated ${field} for ${userId}`);
+      } catch (e) {
+        if (e.message.includes('Document with the requested ID could not be found')) {
+          console.log(`Creating new stats document for ${userId}`);
+          await databases.createDocument(DATABASE_ID, STATS_COLLECTION_ID, userId, {
+            followersCount: 0,
+            followingCount: 0,
+            [field]: value,
+          });
+          console.log(`Created and initialized stats for ${userId}`);
+        } else {
+          throw e;
+        }
+      }
+    };
 
-    await databases.updateDocument(DATABASE_ID, STATS_COLLECTION_ID, followerId, {
-      followingCount,
-    });
-    console.log(`Updated followingCount for ${followerId}`);
+    await updateOrCreate(followeeId, 'followersCount', followersCount);
+    await updateOrCreate(followerId, 'followingCount', followingCount);
 
     return res.json({
       success: true,
