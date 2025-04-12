@@ -48,6 +48,22 @@ export default async function main({ req, res }) {
       return res.json({ success: false, error: 'Missing user IDs' });
     }
 
+    console.log('Checking if follow relationship exists');
+    const existingFollow = await databases.listDocuments(DATABASE_ID, FOLLOWS_COLLECTION_ID, [
+      Query.equal('followerId', followerId),
+      Query.equal('followeeId', followeeId),
+    ]);
+
+    if (existingFollow.total === 0) {
+      console.log('No follow relationship found, creating one');
+      await databases.createDocument(DATABASE_ID, FOLLOWS_COLLECTION_ID, 'unique()', {
+        followerId,
+        followeeId,
+      });
+    } else {
+      console.log('Follow relationship already exists');
+    }
+
     console.log('Fetching followers of', followeeId);
     const followersList = await databases.listDocuments(DATABASE_ID, FOLLOWS_COLLECTION_ID, [
       Query.equal('followeeId', followeeId),
