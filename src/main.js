@@ -15,6 +15,10 @@ export default async function main({ req, res, context }) {
   const STATS_COLLECTION_ID = process.env.STATS_COLLECTION_ID;
 
   try {
+    if (req.method !== 'POST') {
+      return res.json({ success: false, error: 'Method Not Allowed. Only POST requests are accepted.' });
+    }
+
     const rawBody = req.body;
     let body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
     const { followeeId } = body;  // Only extract followeeId from the body
