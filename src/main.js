@@ -13,6 +13,7 @@ export default async function main({ req, res, context }) {
   const DATABASE_ID = process.env.DATABASE_ID;
   const FOLLOWS_COLLECTION_ID = process.env.FOLLOWS_COLLECTION_ID;
   const STATS_COLLECTION_ID = process.env.STATS_COLLECTION_ID;
+  const NOTIFICATIONS_COLLECTION_ID = process.env.NOTIFICATIONS_COLLECTION_ID;
 
   try {
     if (req.method !== 'POST') {
@@ -21,9 +22,8 @@ export default async function main({ req, res, context }) {
 
     const rawBody = req.body;
     let body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
-    const { followeeId } = body;  // Only extract followeeId from the body
+    const { followeeId } = body;
 
-    // Extract the user ID from the headers much saffer
     const followerId = req.headers['x-appwrite-user-id'];
 
     if (!followerId || !followeeId) {
@@ -44,6 +44,20 @@ export default async function main({ req, res, context }) {
         followerId,
         followeeId,
       });
+      
+      await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, 'unique()', {
+        userId: followerId,
+        type: 'follow',
+        relatedUserId: followeeId,
+        relatedPostId: null,
+        seen: false
+      },
+        [
+          Permission.read(Role.user(followerId)),
+          Permission.update(Role.user(followerId)),
+          Permission.delete(Role.user(followerId)), // User followerId can delete this document
+        ]
+      )
     }
 
     const followersList = await databases.listDocuments(DATABASE_ID, FOLLOWS_COLLECTION_ID, [
