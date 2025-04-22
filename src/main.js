@@ -53,11 +53,11 @@ export default async function main({ req, res, context }) {
           relatedPostId: null,
           seen: false
         },
-          // [
-          //   Permission.read(Role.user(followerId)),
-          //   Permission.update(Role.user(followerId)),
-          //   Permission.delete(Role.user(followerId)), // User followerId can delete this document
-          // ]
+          [
+            Permission.read(Role.user(followerId)),
+            Permission.update(Role.user(followerId)),
+            Permission.delete(Role.user(followerId)), // User followerId can delete this document
+          ]
         )
         console.log('noti send');
       } catch (error) {
