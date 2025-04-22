@@ -59,9 +59,8 @@ export default async function main({ req, res, context }) {
             Permission.delete(Role.user(followerId)), // User followerId can delete this document
           ]
         )
-        console.log('noti send');
       } catch (error) {
-        console.log(error);
+  
       }
     }
 
