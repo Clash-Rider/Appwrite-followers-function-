@@ -44,20 +44,25 @@ export default async function main({ req, res, context }) {
         followerId,
         followeeId,
       });
-      
-      await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, 'unique()', {
-        userId: followerId,
-        type: 'follow',
-        relatedUserId: followeeId,
-        relatedPostId: null,
-        seen: false
-      },
-        [
-          Permission.read(Role.user(followerId)),
-          Permission.update(Role.user(followerId)),
-          Permission.delete(Role.user(followerId)), // User followerId can delete this document
-        ]
-      )
+
+      try {
+        await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, 'unique()', {
+          userId: followerId,
+          type: 'follow',
+          relatedUserId: followeeId,
+          relatedPostId: null,
+          seen: false
+        },
+          // [
+          //   Permission.read(Role.user(followerId)),
+          //   Permission.update(Role.user(followerId)),
+          //   Permission.delete(Role.user(followerId)), // User followerId can delete this document
+          // ]
+        )
+        console.log('noti send');
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     const followersList = await databases.listDocuments(DATABASE_ID, FOLLOWS_COLLECTION_ID, [
