@@ -47,16 +47,16 @@ export default async function main({ req, res, context }) {
 
       try {
         await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, 'unique()', {
-          userId: followerId,
+          userId: followeeId,
           type: 'follow',
-          relatedUserId: followeeId,
+          relatedUserId: followerId,
           relatedPostId: null,
           seen: false
         },
           [
-            Permission.read(Role.user(followerId)),
-            Permission.update(Role.user(followerId)),
-            Permission.delete(Role.user(followerId)), // User followerId can delete this document
+            Permission.read(Role.user(followeeId)),
+            Permission.update(Role.user(followeeId)),
+            Permission.delete(Role.user(followeeId)), // User followerId can delete this document
           ]
         )
       } catch (error) {
